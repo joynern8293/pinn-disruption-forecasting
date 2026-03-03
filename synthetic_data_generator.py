@@ -30,10 +30,10 @@ def generate_data(
     """
     t = np.arange(n_points)
 
-    # 1. Base exponential growth y = P0 * exp(k*t)
+    # Base exponential growth y = P0 * exp(k*t)
     p_base = P0 * np.exp(k * t)
 
-    # 2. Create the composite disruption signal F(t)
+    # Create the composite disruption signal F(t)
     # This raw shape is defined as if it were active instantly
     raw_disruption = np.zeros(n_points)
     disruption_len = disruption_end - disruption_start
@@ -64,7 +64,7 @@ def generate_data(
 
             raw_disruption[disruption_start:disruption_end] += (base_magnitude * factor * component_shape)
 
-    # 3. Create the smooth sigmoid window S(t)
+    # Create the smooth sigmoid window S(t)
     def sigmoid(x):
         return 1 / (1 + np.exp(-x))
 
@@ -72,20 +72,20 @@ def generate_data(
     sigmoid2 = sigmoid(transition_steepness * (t - disruption_end))
     window = sigmoid1 * (1 - sigmoid2)
 
-    # 4. Apply the window to the raw disruption: S(t) * F(t)
+    # Apply the window to the raw disruption: S(t) * F(t)
     final_disruption = raw_disruption * window
 
-    # 5. Add Gaussian noise
+    # Add Gaussian noise
     noise = np.random.normal(0, noise_level, n_points)
 
-    # 6. Combine components: y = ke^(rt) + S(t)*F(t) + noise
+    # Combine components: y = ke^(rt) + S(t)*F(t) + noise
     p_final = p_base + final_disruption + noise
 
-    # 7. Create DataFrame
+    # Create DataFrame
     dates = pd.to_datetime(pd.date_range(start='2020-01-01', periods=n_points))
     df = pd.DataFrame({'<DATE>': dates, '<CLOSE>': p_final})
 
-    # 8. Save to CSV
+    # Save to CSV
     df.to_csv(filename, index=False)
 
     if plot_data:
